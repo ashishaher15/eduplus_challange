@@ -66,7 +66,7 @@ export const validateRegistration = (userData) => {
   
   if (!validateRequired(userData.role)) {
     errors.role = 'Role is required';
-  } else if (!['user', 'admin', 'store_owner'].includes(userData.role)) {
+  } else if (!['user', 'admin', 'contractor'].includes(userData.role)) {
     errors.role = 'Invalid role';
   }
   

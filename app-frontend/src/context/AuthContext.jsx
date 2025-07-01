@@ -1,4 +1,5 @@
 import { createContext, useState, useContext, useEffect } from 'react';
+import authApi from '../api/authApi';
 
 const AuthContext = createContext();
 
@@ -30,8 +31,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
   
+  const updateProfileImage = async (imageUrl) => {
+    if (user) {
+      const updatedUser = { ...user, profile_image_url: imageUrl };
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      return updatedUser;
+    }
+    return null;
+  };
+  
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateProfileImage, loading }}>
       {children}
     </AuthContext.Provider>
   );

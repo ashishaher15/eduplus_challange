@@ -138,7 +138,7 @@ function AdminAddUser() {
           >
             <option value="user">User</option>
             <option value="admin">Admin</option>
-            <option value="store_owner">Store Owner</option>
+            <option value="contractor">Store Owner</option>
           </select>
           {errors.role && <div style={{ color: 'red', fontSize: '14px', marginTop: '5px' }}>{errors.role}</div>}
         </div>

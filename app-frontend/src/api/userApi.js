@@ -12,7 +12,7 @@ const userApi = {
       const response = await axios.get(url);
       return response.data;
     } catch (error) {
-      throw error.response?.data || { error: 'Failed to fetch stores' };
+      throw error.response?.data || { error: 'Failed to fetch companies' };
     }
   },
   
@@ -24,7 +24,7 @@ const userApi = {
       );
       return response.data;
     } catch (error) {
-      throw error.response?.data || { error: 'Failed to submit rating' };
+      throw error.response?.data || { error: 'Failed to submit application' };
     }
   }
 };

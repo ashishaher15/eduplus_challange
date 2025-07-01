@@ -8,7 +8,7 @@ router.get('/users', getAllUsers);
 router.get('/users/:id', getUserById);
 router.post('/users', createUser);
 
-// Store management routes
+// Company management routes (keeping original paths for API compatibility)
 router.get('/stores', getAllStores);
 router.post('/stores', createStore);
 router.get('/stores/owner/:ownerId', getStoreByOwnerId);

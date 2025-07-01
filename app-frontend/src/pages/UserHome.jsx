@@ -1,14 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/AuthContext"
 import userApi from "../api/userApi"
 import authApi from "../api/authApi"
-import { Search, Star, StarOff, User, Lock, LogOut, Settings, Store, MapPin, Eye, EyeOff } from "lucide-react"
+import { Search, Star, StarOff, User, Lock, LogOut, Settings, Store, MapPin, Eye, EyeOff, Upload, Camera } from "lucide-react"
 
 function UserHome() {
-  const { user, logout } = useAuth()
+  const { user, logout, updateProfileImage } = useAuth()
   const navigate = useNavigate()
   const [stores, setStores] = useState([])
   const [isLoading, setIsLoading] = useState(true)
@@ -23,7 +23,12 @@ function UserHome() {
   const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [showOldPassword, setShowOldPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
-
+  // Add these new state variables for image upload
+  const fileInputRef = useRef(null)
+  const [imageFile, setImageFile] = useState(null)
+  const [imagePreview, setImagePreview] = useState(null)
+  const [isUploading, setIsUploading] = useState(false)
+  
   useEffect(() => {
     // Redirect if not logged in or not a user
     if (!user || user.role !== "user") {
@@ -111,6 +116,66 @@ function UserHome() {
     }
   }
 
+  // Move these functions inside the component
+  const handleImageChange = (e) => {
+    const file = e.target.files[0]
+    if (!file) return
+    
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB")
+      return
+    }
+    
+    setImageFile(file)
+    
+    // Create preview
+    const reader = new FileReader()
+    reader.onloadend = () => {
+      setImagePreview(reader.result)
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleImageUpload = async () => {
+    if (!imageFile || !user) return
+    
+    setIsUploading(true)
+    try {
+      // Convert image to base64
+      const reader = new FileReader()
+      reader.readAsDataURL(imageFile)
+      reader.onload = async () => {
+        const base64Image = reader.result
+        
+        // Upload to server
+        const response = await authApi.uploadProfileImage({
+          userId: user.id,
+          imageBase64: base64Image
+        })
+        
+        // Update user context with new image URL
+        await updateProfileImage(response.imageUrl)
+        
+        // Reset state
+        setImageFile(null)
+        setImagePreview(null)
+        setIsUploading(false)
+        
+        // Clear file input
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""
+        }
+        
+        // Success message
+        alert("Profile image updated successfully!")
+      }
+    } catch (error) {
+      console.error("Error uploading image:", error)
+      setIsUploading(false)
+      alert("Failed to upload image. Please try again.")
+    }
+  }
+
   const renderStars = (rating) => {
     const stars = []
     const fullStars = Math.floor(rating)
@@ -140,30 +205,30 @@ function UserHome() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> {/* Increased py-4 to py-8 */}
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="inline-flex items-center justify-center w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
-                <User className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-8"> {/* Increased space-x-4 to space-x-8 */}
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg"> {/* Increased w-10 h-10 to w-20 h-20 */}
+                <User className="w-12 h-12 text-white" /> {/* Increased w-6 h-6 to w-12 h-12 */}
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">User Dashboard</h1>
-                <p className="text-gray-600">Welcome back, {user.name}!</p>
+                <h1 className="text-4xl font-bold text-gray-900">User Dashboard</h1> {/* Increased text-2xl to text-4xl */}
+                <p className="text-xl text-gray-600">Welcome back, {user.name}!</p> {/* Added text-xl */}
               </div>
             </div>
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-6"> {/* Increased space-x-3 to space-x-6 */}
               <button
                 onClick={() => setShowPasswordForm(!showPasswordForm)}
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
-              >
-                <Settings className="w-4 h-4 mr-2" />
+                className="inline-flex items-center px-8 py-4 border border-gray-300 rounded-lg text-lg font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
+              > {/* Increased px-4 py-2 to px-8 py-4 and text-sm to text-lg */}
+                <Settings className="w-8 h-8 mr-4" /> {/* Increased w-4 h-4 mr-2 to w-8 h-8 mr-4 */}
                 Settings
               </button>
               <button
                 onClick={logout}
-                className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-sm font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 transform hover:scale-105"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
+                className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 transform hover:scale-105"
+              > {/* Increased px-4 py-2 to px-8 py-4 and text-sm to text-lg */}
+                <LogOut className="w-8 h-8 mr-4" /> {/* Increased w-4 h-4 mr-2 to w-8 h-8 mr-4 */}
                 Logout
               </button>
             </div>
@@ -171,22 +236,88 @@ function UserHome() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Welcome Card */}
-        <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-fade-in">
-          <div className="flex items-center space-x-4">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
-              <User className="w-8 h-8 text-white" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"> {/* Increased py-8 to py-16 */}
+        {/* Welcome Card with Profile Image */}
+        <div className="bg-white rounded-xl shadow-lg p-12 mb-16 animate-fade-in"> {/* Increased p-6 mb-8 to p-12 mb-16 */}
+          <div className="flex items-center space-x-8"> {/* Increased space-x-4 to space-x-8 */}
+            <div className="relative">
+              {user.profile_image_url ? (
+                <img 
+                  src={user.profile_image_url} 
+                  alt="Profile" 
+                  className="w-32 h-32 rounded-full object-cover border-4 border-purple-500"
+                /> 
+              ) : (
+                <div className="w-32 h-32 bg-gradient-to-r from-purple-600 to-blue-600 rounded-full flex items-center justify-center">
+                  <User className="w-16 h-16 text-white" />
+                </div> 
+              )}
+              <button 
+                onClick={() => fileInputRef.current.click()}
+                className="absolute -bottom-2 -right-2 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition-colors"
+              > {/* Increased p-1 to p-2 and adjusted position */}
+                <Camera className="w-8 h-8" /> {/* Increased w-4 h-4 to w-8 h-8 */}
+              </button>
+              <input 
+                type="file" 
+                ref={fileInputRef}
+                onChange={handleImageChange}
+                accept="image/*"
+                className="hidden"
+              />
             </div>
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Welcome, {user.name}!</h2>
-              <p className="text-gray-600">
+              <h2 className="text-3xl font-semibold text-gray-900">Welcome, {user.name}!</h2> {/* Increased text-xl to text-3xl */}
+              <p className="text-xl text-gray-600"> {/* Added text-xl */}
                 You are logged in as a <span className="font-medium text-purple-600">{user.role}</span>
               </p>
             </div>
           </div>
+          
+          {/* Image Preview and Upload Button */}
+          {imagePreview && (
+            <div className="mt-8 flex flex-col items-center space-y-6"> {/* Increased mt-4 space-y-3 to mt-8 space-y-6 */}
+              <div className="relative w-64 h-64"> {/* Increased w-32 h-32 to w-64 h-64 */}
+                <img 
+                  src={imagePreview} 
+                  alt="Preview" 
+                  className="w-64 h-64 rounded-lg object-cover"
+                /> {/* Increased w-32 h-32 to w-64 h-64 */}
+                <button 
+                  onClick={() => {
+                    setImagePreview(null);
+                    setImageFile(null);
+                    if (fileInputRef.current) fileInputRef.current.value = "";
+                  }}
+                  className="absolute -top-4 -right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
+                > {/* Increased -top-2 -right-2 p-1 to -top-4 -right-4 p-2 */}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"> {/* Increased h-4 w-4 to h-8 w-8 */}
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+              <button
+                onClick={handleImageUpload}
+                disabled={isUploading}
+                className={`px-8 py-4 rounded-lg text-white font-medium flex items-center text-lg ${isUploading ? 'bg-gray-400' : 'bg-purple-600 hover:bg-purple-700'} transition-colors`}
+              > {/* Increased px-4 py-2 to px-8 py-4 and added text-lg */}
+                {isUploading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white mr-4"></div> {/* Increased h-4 w-4 mr-2 to h-8 w-8 mr-4 */}
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-8 h-8 mr-4" /> {/* Increased w-4 h-4 mr-2 to w-8 h-8 mr-4 */}
+                    Upload Profile Image
+                  </>
+                )}
+              </button>
+            </div>
+          )}
         </div>
-
+        
+        {/* Rest of the component remains the same with size increases */}
         {/* Password Update Form */}
         {showPasswordForm && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-slide-down">
@@ -268,7 +399,7 @@ function UserHome() {
         <div className="bg-white rounded-xl shadow-lg p-6 animate-fade-in">
           <div className="flex items-center space-x-3 mb-6">
             <Store className="w-6 h-6 text-purple-600" />
-            <h2 className="text-xl font-semibold text-gray-900">Store Listings</h2>
+            <h2 className="text-xl font-semibold text-gray-900">Company Listings</h2>
           </div>
 
           {/* Search Form */}
@@ -283,7 +414,7 @@ function UserHome() {
                     value={searchName}
                     onChange={(e) => setSearchName(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-                    placeholder="Enter store name"
+                    placeholder="Enter company name"
                   />
                 </div>
               </div>
@@ -297,7 +428,7 @@ function UserHome() {
                     value={searchAddress}
                     onChange={(e) => setSearchAddress(e.target.value)}
                     className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
-                    placeholder="Enter store address"
+                    placeholder="Enter company address"
                   />
                 </div>
               </div>
@@ -308,7 +439,7 @@ function UserHome() {
               className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 transition-all duration-200 transform hover:scale-105"
             >
               <Search className="w-4 h-4 mr-2 inline" />
-              Search Stores
+              Search Companies
             </button>
           </form>
 
@@ -316,16 +447,16 @@ function UserHome() {
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple-600"></div>
-              <span className="ml-3 text-gray-600">Loading stores...</span>
+              <span className="ml-3 text-gray-600">Loading companies...</span>
             </div>
           ) : stores.length === 0 ? (
             <div className="text-center py-12">
               <Store className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-              <p className="text-gray-500 text-lg">No stores found.</p>
+              <p className="text-gray-500 text-lg">No companies found.</p>
               <p className="text-gray-400">Try adjusting your search criteria.</p>
             </div>
           ) : (
-            /* Stores Grid */
+            /* Companies Grid */
             <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {stores.map((store, index) => (
                 <div
@@ -357,7 +488,7 @@ function UserHome() {
                     </div>
 
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-gray-700">Your Rating</span>
+                      <span className="text-sm font-medium text-gray-700">Your Application</span>
                       <div className="flex items-center space-x-2">
                         {store.userRating ? (
                           <>
@@ -369,13 +500,13 @@ function UserHome() {
                             </span>
                           </>
                         ) : (
-                          <span className="text-sm text-gray-500">Not rated</span>
+                          <span className="text-sm text-gray-500">Not applied</span>
                         )}
                       </div>
                     </div>
 
                     <div className="pt-3 border-t border-gray-200">
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Rate this store</label>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Apply to this company</label>
                       <select
                         value={store.userRating || ""}
                         onChange={(e) => handleRatingChange(store.id, e.target.value)}

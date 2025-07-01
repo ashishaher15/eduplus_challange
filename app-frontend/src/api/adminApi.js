@@ -42,7 +42,7 @@ const adminApi = {
     }
   },
 
-  // Store management
+  // Company management (keeping original function names for compatibility)
   getAllStores: async () => {
     try {
       const response = await axios.get(`${API_BASE}/admin/stores`, {
@@ -52,20 +52,20 @@ const adminApi = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { error: 'Failed to fetch stores' };
+      throw error.response?.data || { error: 'Failed to fetch companies' };
     }
   },
   
-  createStore: async (storeData) => {
+  createStore: async (companyData) => {
     try {
-      const response = await axios.post(`${API_BASE}/admin/stores`, storeData, {
+      const response = await axios.post(`${API_BASE}/admin/stores`, companyData, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { error: 'Failed to create store' };
+      throw error.response?.data || { error: 'Failed to create company' };
     }
   },
   
@@ -78,20 +78,20 @@ const adminApi = {
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { error: 'Failed to fetch store details' };
+      throw error.response?.data || { error: 'Failed to fetch company details' };
     }
   },
   
-  getStoreRatingUsers: async (storeId) => {
+  getStoreRatingUsers: async (companyId) => {
     try {
-      const response = await axios.get(`${API_BASE}/admin/stores/${storeId}/ratings/users`, {
+      const response = await axios.get(`${API_BASE}/admin/stores/${companyId}/ratings/users`, {
         headers: {
           'Content-Type': 'application/json',
         },
       });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { error: 'Failed to fetch rating users' };
+      throw error.response?.data || { error: 'Failed to fetch application users' };
     }
   },
 };

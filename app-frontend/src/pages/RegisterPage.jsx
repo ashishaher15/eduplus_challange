@@ -43,7 +43,12 @@ function RegisterPage() {
 
     setIsSubmitting(true)
     try {
-      const userData = await authApi.registerUser(formData)
+      // Convert role to lowercase and trim any whitespace before sending to API
+      const submissionData = {
+        ...formData,
+        role: formData.role.toLowerCase().trim()
+      }
+      const userData = await authApi.registerUser(submissionData)
       login(userData)
 
       // Redirect based on role
@@ -51,7 +56,7 @@ function RegisterPage() {
         case "admin":
           navigate("/admin")
           break
-        case "store_owner":
+        case "contractor":
           navigate("/owner")
           break
         default:
@@ -105,9 +110,7 @@ function RegisterPage() {
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${
-                    errors.name ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${errors.name ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"}`}
                   placeholder="Enter your full name"
                 />
               </div>
@@ -131,9 +134,7 @@ function RegisterPage() {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${
-                    errors.email ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${errors.email ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"}`}
                   placeholder="Enter your email address"
                 />
               </div>
@@ -153,9 +154,7 @@ function RegisterPage() {
                   value={formData.address}
                   onChange={handleChange}
                   rows={3}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 resize-none ${
-                    errors.address ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 resize-none ${errors.address ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"}`}
                   placeholder="Enter your full address"
                 />
               </div>
@@ -181,9 +180,7 @@ function RegisterPage() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${
-                    errors.password ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 ${errors.password ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"}`}
                   placeholder="Enter your password"
                 />
                 <button
@@ -210,13 +207,11 @@ function RegisterPage() {
                   name="role"
                   value={formData.role}
                   onChange={handleChange}
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 appearance-none bg-white ${
-                    errors.role ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"
-                  }`}
+                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300 appearance-none bg-white ${errors.role ? "border-red-300 bg-red-50" : "border-gray-300 hover:border-gray-400"}`}
                 >
                   <option value="user">User</option>
                   <option value="admin">Admin</option>
-                  <option value="store_owner">Store Owner</option>
+                  <option value="contractor">Contractor</option>
                 </select>
                 <div className="absolute right-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
                   <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -231,11 +226,7 @@ function RegisterPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${
-                isSubmitting
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl"
-              }`}
+              className={`w-full py-3 px-4 rounded-lg font-medium text-white transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 ${isSubmitting ? "bg-gray-400 cursor-not-allowed" : "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 shadow-lg hover:shadow-xl"}`}
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center">

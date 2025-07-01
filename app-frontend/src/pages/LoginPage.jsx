@@ -42,6 +42,12 @@ function LoginPage() {
     setIsSubmitting(true)
     try {
       const userData = await authApi.loginUser(formData)
+      
+      // Debug information
+      console.log("Login response:", userData)
+      console.log("User role:", userData.role)
+      console.log("Role type:", typeof userData.role)
+      
       login(userData)
 
       // Redirect based on role
@@ -49,10 +55,15 @@ function LoginPage() {
         case "admin":
           navigate("/admin")
           break
-        case "store_owner":
+        case "contractor":
+          navigate("/owner")
+          break
+        case "store_owner": // Add this case to handle store_owner role
+          console.log("Detected store_owner role, redirecting to /owner")
           navigate("/owner")
           break
         default:
+          console.log("Using default redirection for role:", userData.role)
           navigate("/user")
       }
     } catch (error) {

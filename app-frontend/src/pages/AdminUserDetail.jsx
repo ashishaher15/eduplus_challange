@@ -108,7 +108,7 @@ function AdminUserDetail() {
               fontWeight: 'bold',
               backgroundColor: 
                 userData.role === 'admin' ? '#ff9800' : 
-                userData.role === 'store_owner' ? '#2196f3' : 
+                userData.role === 'contractor' ? '#2196f3' : 
                 '#4caf50',
               color: 'white'
             }}>
@@ -135,7 +135,7 @@ function AdminUserDetail() {
             </p>
           </div>
           
-          {userData.role === 'store_owner' && (
+          {userData.role === 'contractor' && (
             <div style={{ marginTop: '20px', padding: '15px', backgroundColor: '#e3f2fd', borderRadius: '4px' }}>
               <h3 style={{ margin: '0 0 10px 0', fontSize: '18px' }}>Store Owner Information</h3>
               <p style={{ margin: '0', color: '#666' }}>

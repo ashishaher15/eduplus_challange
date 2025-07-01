@@ -92,7 +92,7 @@ function AdminUsers() {
           >
             <option value="">All Roles</option>
             <option value="admin">Admin</option>
-            <option value="store_owner">Store Owner</option>
+            <option value="contractor">Contractor</option>
             <option value="user">User</option>
           </select>
         </div>

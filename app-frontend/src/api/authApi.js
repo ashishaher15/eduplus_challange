@@ -43,6 +43,32 @@ const authApi = {
     } catch (error) {
       throw error.response?.data || { error: 'Password update failed' };
     }
+  },
+  
+  uploadProfileImage: async ({ userId, imageBase64 }) => {
+    try {
+      const response = await axios.post(
+        `${API_BASE}/auth/profile-image`,
+        { userId, imageBase64 },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Image upload failed' };
+    }
+  },
+  
+  getUserProfile: async (userId) => {
+    try {
+      const response = await axios.get(`${API_BASE}/auth/profile/${userId}`);
+      return response.data;
+    } catch (error) {
+      throw error.response?.data || { error: 'Failed to get user profile' };
+    }
   }
 };
 

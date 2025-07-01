@@ -1,40 +1,41 @@
 import { pool } from '../config/dbConfig.js';
 import { validateRegistration } from '../utils/validators.js';
 
-// Get all users with store information for store owners
+// Get all users with company information for contractors
 export const getAllUsers = async (req, res) => {
   try {
-    // First check if stores table exists
-    const [tables] = await pool.query(
-      "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = ? AND table_name = 'stores'",
-      [process.env.DB_NAME || 'polling_db']
+    // First check if companies table exists
+    const { rows: tables } = await pool.query(
+      "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'companies'"
     );
     
     let users;
     
-    if (tables[0].count > 0) {
-      // If stores table exists, use the original query
-      [users] = await pool.query(
+    if (parseInt(tables[0].count) > 0) {
+      // If companies table exists, use the original query
+      const { rows } = await pool.query(
         `SELECT u.id, u.name, u.email, u.address, u.role, u.created_at,
-          s.id AS storeId, 
-          COALESCE(AVG(r.rating), 0) AS storeAverageRating, 
-          COUNT(r.id) AS ratingsCount 
+          c.id AS companyId, 
+          COALESCE(AVG(a.rating), 0) AS companyAverageRating, 
+          COUNT(a.id) AS applicationsCount 
         FROM users u 
-        LEFT JOIN stores s ON u.id = s.owner_user_id 
-        LEFT JOIN ratings r ON s.id = r.store_id 
-        GROUP BY u.id, u.name, u.email, u.address, u.role, u.created_at, s.id 
+        LEFT JOIN companies c ON u.id = c.owner_user_id 
+        LEFT JOIN applications a ON c.id = a.company_id 
+        GROUP BY u.id, u.name, u.email, u.address, u.role, u.created_at, c.id 
         ORDER BY u.name ASC`
       );
+      users = rows;
     } else {
-      // If stores table doesn't exist, use a simpler query
-      [users] = await pool.query(
+      // If companies table doesn't exist, use a simpler query
+      const { rows } = await pool.query(
         `SELECT id, name, email, address, role, created_at,
-          NULL AS storeId,
-          0 AS storeAverageRating,
-          0 AS ratingsCount
+          NULL AS companyId,
+          0 AS companyAverageRating,
+          0 AS applicationsCount
         FROM users
         ORDER BY name ASC`
       );
+      users = rows;
     }
     
     res.json(users);
@@ -44,64 +45,67 @@ export const getAllUsers = async (req, res) => {
   }
 };
 
-// Get all stores with ratings
+// Get all companies with applications
 export const getAllStores = async (req, res) => {
   try {
-    // First check if stores table exists
-    const [tables] = await pool.query(
-      "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = ? AND table_name = 'stores'",
-      [process.env.DB_NAME || 'polling_db']
+    // First check if companies table exists
+    const { rows: tables } = await pool.query(
+      "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'companies'"
     );
     
-    if (tables[0].count === 0) {
-      // If stores table doesn't exist, return empty array
+    if (parseInt(tables[0].count) === 0) {
+      // If companies table doesn't exist, return empty array
       return res.json([]);
     }
     
-    // Check if ratings table exists
-    const [ratingTables] = await pool.query(
-      "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = ? AND table_name = 'ratings'",
-      [process.env.DB_NAME || 'polling_db']
+    // Check if applications table exists
+    const { rows: applicationTables } = await pool.query(
+      "SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = current_schema() AND table_name = 'applications'"
     );
     
-    let stores;
+    let companies;
     
-    if (ratingTables[0].count > 0) {
-      // If ratings table exists, use the original query
-      [stores] = await pool.query(
-        `SELECT s.id, s.name, s.email, s.address, 
-          COALESCE(AVG(r.rating), 0) AS averageRating, 
-          COUNT(r.id) AS ratingsCount 
-        FROM stores s 
-        LEFT JOIN ratings r ON s.id = r.store_id 
-        GROUP BY s.id, s.name, s.email, s.address 
-        ORDER BY s.name ASC`
+    if (parseInt(applicationTables[0].count) > 0) {
+      // If applications table exists, use the original query
+      const { rows } = await pool.query(
+        `SELECT c.id, c.name, c.email, c.address, 
+          COALESCE(AVG(a.rating), 0) AS averageRating, 
+          COUNT(a.id) AS applicationsCount 
+        FROM companies c 
+        LEFT JOIN applications a ON c.id = a.company_id 
+        GROUP BY c.id, c.name, c.email, c.address 
+        ORDER BY c.name ASC`
       );
+      companies = rows;
     } else {
-      // If ratings table doesn't exist, use a simpler query
-      [stores] = await pool.query(
+      // If applications table doesn't exist, use a simpler query
+      const { rows } = await pool.query(
         `SELECT id, name, email, address,
           0 AS averageRating,
-          0 AS ratingsCount
-        FROM stores
+          0 AS applicationsCount
+        FROM companies
         ORDER BY name ASC`
       );
+      companies = rows;
     }
     
-    res.json(stores);
+    res.json(companies);
   } catch (err) {
-    console.error('Error fetching stores:', err);
-    res.status(500).json({ error: 'Failed to fetch stores' });
+    console.error('Error fetching companies:', err);
+    res.status(500).json({ error: 'Failed to fetch companies' });
   }
 };
+
+// Rename function but keep the same name for API compatibility
+export const getAllCompanies = getAllStores;
 
 // Get user by ID
 export const getUserById = async (req, res) => {
   const userId = req.params.id;
   
   try {
-    const [users] = await pool.query(
-      'SELECT id, name, email, role, address, created_at FROM users WHERE id = ?',
+    const { rows: users } = await pool.query(
+      'SELECT id, name, email, role, address, created_at FROM users WHERE id = $1',
       [userId]
     );
     
@@ -128,20 +132,20 @@ export const createUser = async (req, res) => {
   
   try {
     // Check if email already exists
-    const [existingUsers] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    const { rows: existingUsers } = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
     
     if (existingUsers.length > 0) {
       return res.status(400).json({ error: 'Email already in use' });
     }
     
     // Insert new user
-    const [result] = await pool.query(
-      'INSERT INTO users (name, email, address, password, role) VALUES (?, ?, ?, ?, ?)',
+    const { rows } = await pool.query(
+      'INSERT INTO users (name, email, address, password, role) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [name, email, address, password, role]
     );
     
     // Return user info without password
-    const userId = result.insertId;
+    const userId = rows[0].id;
     res.status(201).json({
       id: userId,
       name,
@@ -155,32 +159,31 @@ export const createUser = async (req, res) => {
   }
 };
 
-// Create new store
-// Create new store
+// Create new company
 export const createStore = async (req, res) => {
   const { name, email, address, items, owner_user_id } = req.body;
   
   try {
-    // Check if owner exists and is a store_owner
-    const [owners] = await pool.query(
-      'SELECT * FROM users WHERE id = ? AND role = "store_owner"',
-      [owner_user_id]
+    // Check if owner exists and is a contractor
+    const { rows: owners } = await pool.query(
+      'SELECT * FROM users WHERE id = $1 AND role = $2',
+      [owner_user_id, 'contractor']
     );
     
     if (owners.length === 0) {
-      return res.status(400).json({ error: 'Invalid store owner ID or user is not a store owner' });
+      return res.status(400).json({ error: 'Invalid company owner ID or user is not a contractor' });
     }
     
-    // Insert new store
-    const [result] = await pool.query(
-      'INSERT INTO stores (name, email, address, owner_user_id) VALUES (?, ?, ?, ?)',
+    // Insert new company
+    const { rows } = await pool.query(
+      'INSERT INTO companies (name, email, address, owner_user_id) VALUES ($1, $2, $3, $4) RETURNING id',
       [name, email, address, owner_user_id]
     );
     
-    // Return store info
-    const storeId = result.insertId;
+    // Return company info
+    const companyId = rows[0].id;
     res.status(201).json({
-      id: storeId,
+      id: companyId,
       name,
       email,
       address,
@@ -188,64 +191,73 @@ export const createStore = async (req, res) => {
       items: items || []
     });
   } catch (err) {
-    console.error('Store creation error:', err);
-    res.status(500).json({ error: 'Failed to create store' });
+    console.error('Company creation error:', err);
+    res.status(500).json({ error: 'Failed to create company' });
   }
 };
 
-// Get store by owner ID
+// Rename function but keep the same name for API compatibility
+export const createCompany = createStore;
+
+// Get company by owner ID
 export const getStoreByOwnerId = async (req, res) => {
   const ownerId = req.params.ownerId;
   
   try {
-    const [stores] = await pool.query(
-      `SELECT s.*, COALESCE(AVG(r.rating), 0) AS averageRating, COUNT(r.id) AS ratingsCount 
-       FROM stores s 
-       LEFT JOIN ratings r ON s.id = r.store_id 
-       WHERE s.owner_user_id = ? 
-       GROUP BY s.id`,
+    const { rows: companies } = await pool.query(
+      `SELECT c.*, COALESCE(AVG(a.rating), 0) AS averageRating, COUNT(a.id) AS applicationsCount 
+       FROM companies c 
+       LEFT JOIN applications a ON c.id = a.company_id 
+       WHERE c.owner_user_id = $1 
+       GROUP BY c.id`,
       [ownerId]
     );
     
-    if (stores.length === 0) {
-      return res.status(404).json({ error: 'Store not found for this owner' });
+    if (companies.length === 0) {
+      return res.status(404).json({ error: 'Company not found for this owner' });
     }
     
-    res.json(stores[0]);
+    res.json(companies[0]);
   } catch (err) {
-    console.error('Error fetching store:', err);
-    res.status(500).json({ error: 'Failed to fetch store' });
+    console.error('Error fetching company:', err);
+    res.status(500).json({ error: 'Failed to fetch company' });
   }
 };
 
-// Get users who have rated a specific store
+// Rename function but keep the same name for API compatibility
+export const getCompanyByOwnerId = getStoreByOwnerId;
+
+// Get users who have applied to a specific company
 export const getStoreRatingUsers = async (req, res) => {
-  const storeId = req.params.storeId;
+  const companyId = req.params.storeId;
   
   try {
-    // Check if store exists and belongs to the requesting user
-    const [stores] = await pool.query(
-      'SELECT * FROM stores WHERE id = ?',
-      [storeId]
+    // Check if company exists
+    const { rows: companies } = await pool.query(
+      'SELECT * FROM companies WHERE id = $1',
+      [companyId]
     );
     
-    if (stores.length === 0) {
-      return res.status(404).json({ error: 'Store not found' });
+    if (companies.length === 0) {
+      return res.status(404).json({ error: 'Company not found' });
     }
     
-    // Get users who rated this store
-    const [ratingUsers] = await pool.query(
-      `SELECT u.id, u.name, u.email, r.rating, r.created_at as rating_date
-       FROM ratings r
-       JOIN users u ON r.user_id = u.id
-       WHERE r.store_id = ?
-       ORDER BY r.created_at DESC`,
-      [storeId]
+    // Get users who applied to this company
+    const { rows: applicationUsers } = await pool.query(
+      `SELECT u.id, u.name, u.email, a.rating, a.created_at as application_date
+       FROM applications a
+       JOIN users u ON a.user_id = u.id
+       WHERE a.company_id = $1
+       ORDER BY a.created_at DESC`,
+      [companyId]
     );
     
-    res.json(ratingUsers);
+    res.json(applicationUsers);
   } catch (err) {
-    console.error('Error fetching rating users:', err);
-    res.status(500).json({ error: 'Failed to fetch rating users' });
+    console.error('Error fetching application users:', err);
+    res.status(500).json({ error: 'Failed to fetch application users' });
   }
 };
+
+// Rename function but keep the same name for API compatibility
+export const getCompanyApplicationUsers = getStoreRatingUsers;

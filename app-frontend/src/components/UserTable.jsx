@@ -18,7 +18,7 @@ function UserTable({ users, isLoading }) {
             <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Name</th>
             <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Email</th>
             <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Role</th>
-            <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Store Rating</th>
+            <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Company Rating</th>
             <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #ddd' }}>Actions</th>
           </tr>
         </thead>
@@ -36,7 +36,7 @@ function UserTable({ users, isLoading }) {
                   fontWeight: 'bold',
                   backgroundColor: 
                     user.role === 'admin' ? '#ff9800' : 
-                    user.role === 'store_owner' ? '#2196f3' : 
+                    user.role === 'contractor' ? '#2196f3' : 
                     '#4caf50',
                   color: 'white'
                 }}>
@@ -44,10 +44,10 @@ function UserTable({ users, isLoading }) {
                 </span>
               </td>
               <td style={{ padding: '12px' }}>
-                {user.role !== 'store_owner' ? (
+                {user.role !== 'contractor' ? (
                   "-"
                 ) : user.storeId === null ? (
-                  "No store"
+                  "No company"
                 ) : (
                   `${parseFloat(user.storeAverageRating).toFixed(2)} (${user.ratingsCount} votes)`
                 )}

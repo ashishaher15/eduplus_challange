@@ -13,10 +13,10 @@ import AdminHome from './pages/AdminHome';
 import AdminUsers from './pages/AdminUsers';
 import AdminAddUser from './pages/AdminAddUser';
 import AdminUserDetail from './pages/AdminUserDetail';
-import AdminStores from './pages/AdminStores';
-import AdminStoreForm from './pages/AdminStoreForm';
-import StoreOwnerHome from './pages/StoreOwnerHome';
-import StoreForm from './pages/StoreForm';
+import AdminCompanies from './pages/AdminCompanies';
+import AdminCompanyForm from './pages/AdminCompanyForm';
+import ContractorHome from './pages/ContractorHome';
+import CompanyForm from './pages/CompanyForm';
 
 function App() {
   return (
@@ -63,7 +63,7 @@ function App() {
             path="/admin/stores" 
             element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <AdminStores />
+                <AdminCompanies />
               </ProtectedRoute>
             } 
           />
@@ -72,7 +72,7 @@ function App() {
             path="/admin/stores/new" 
             element={
               <ProtectedRoute allowedRoles={['admin']}>
-                <AdminStoreForm />
+                <AdminCompanyForm />
               </ProtectedRoute>
             } 
           />
@@ -99,8 +99,8 @@ function App() {
           <Route 
             path="/owner" 
             element={
-              <ProtectedRoute allowedRoles={['store_owner']}>
-                <StoreOwnerHome />
+              <ProtectedRoute allowedRoles={['contractor', 'store_owner']}>
+                <ContractorHome />
               </ProtectedRoute>
             } 
           />
@@ -108,8 +108,8 @@ function App() {
           <Route 
             path="/owner/store/new" 
             element={
-              <ProtectedRoute allowedRoles={['store_owner']}>
-                <StoreForm />
+              <ProtectedRoute allowedRoles={['contractor', 'store_owner']}>
+                <CompanyForm />
               </ProtectedRoute>
             } 
           />

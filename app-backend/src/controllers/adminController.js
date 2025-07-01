@@ -244,7 +244,7 @@ export const getStoreRatingUsers = async (req, res) => {
     
     // Get users who applied to this company
     const { rows: applicationUsers } = await pool.query(
-      `SELECT u.id, u.name, u.email, a.rating, a.created_at as application_date
+      `SELECT u.id, u.name, u.email, a.rating, a.proposal, a.created_at as application_date
        FROM applications a
        JOIN users u ON a.user_id = u.id
        WHERE a.company_id = $1

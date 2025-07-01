@@ -57,7 +57,7 @@ export const getAllCompanies = getAllStores;
 // Submit or update an application for a company
 export const submitRating = async (req, res) => {
   try {
-    const { userId, rating } = req.body;
+    const { userId, rating, proposal } = req.body;
     const companyId = req.params.storeId;
     
     // Validate inputs
@@ -80,14 +80,14 @@ export const submitRating = async (req, res) => {
     if (existingApplications.length > 0) {
       // Update existing application
       result = await pool.query(
-        'UPDATE applications SET rating = $1 WHERE id = $2',
-        [rating, existingApplications[0].id]
+        'UPDATE applications SET rating = $1, proposal = $2 WHERE id = $3',
+        [rating, proposal, existingApplications[0].id]
       );
     } else {
       // Insert new application
       result = await pool.query(
-        'INSERT INTO applications (user_id, company_id, rating) VALUES ($1, $2, $3)',
-        [userId, companyId, rating]
+        'INSERT INTO applications (user_id, company_id, rating, proposal) VALUES ($1, $2, $3, $4)',
+        [userId, companyId, rating, proposal]
       );
     }
     
@@ -100,7 +100,12 @@ export const submitRating = async (req, res) => {
           SELECT a2.rating 
           FROM applications a2 
           WHERE a2.company_id = c.id AND a2.user_id = $1 
-        ) AS userRating 
+        ) AS userRating,
+        (
+          SELECT a2.proposal 
+          FROM applications a2 
+          WHERE a2.company_id = c.id AND a2.user_id = $1 
+        ) AS userProposal
       FROM companies c 
       LEFT JOIN applications a ON c.id = a.company_id 
       WHERE c.id = $2 

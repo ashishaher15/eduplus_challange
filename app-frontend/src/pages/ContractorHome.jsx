@@ -26,6 +26,7 @@ function ContractorHome() {
   const [showApplicationUsers, setShowApplicationUsers] = useState(false)
   const [showOldPassword, setShowOldPassword] = useState(false)
   const [showNewPassword, setShowNewPassword] = useState(false)
+  const [expandedProposal, setExpandedProposal] = useState(null)
   
   // Add image upload state variables
   const [imageFile, setImageFile] = useState(null)
@@ -382,6 +383,7 @@ function ContractorHome() {
                           <th className="text-left py-3 px-4 font-medium text-gray-700">Name</th>
                           <th className="text-left py-3 px-4 font-medium text-gray-700">Email</th>
                           <th className="text-left py-3 px-4 font-medium text-gray-700">Application</th>
+                          <th className="text-left py-3 px-4 font-medium text-gray-700">Proposal</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -398,6 +400,43 @@ function ContractorHome() {
                                 <div className="flex items-center space-x-1">{renderStars(user.rating)}</div>
                                 <span className="font-medium text-gray-900">{user.rating}</span>
                               </div>
+                            </td>
+                            <td className="py-3 px-4">
+                              {user.proposal ? (
+                                <div className="max-w-xs">
+                                  <div className="relative">
+                                    <div className="text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-200 max-h-24 overflow-y-auto">
+                                      {user.proposal.length > 100 
+                                        ? user.proposal.substring(0, 100) + "..." 
+                                        : user.proposal}
+                                    </div>
+                                    {user.proposal.length > 100 && (
+                                      <button 
+                                        onClick={() => setExpandedProposal(expandedProposal === user.id ? null : user.id)}
+                                        className="mt-1 text-blue-600 hover:text-blue-800 hover:underline text-sm"
+                                      >
+                                        {expandedProposal === user.id ? "Show Less" : "Show More"}
+                                      </button>
+                                    )}
+                                  </div>
+                                  {expandedProposal === user.id && (
+                                    <div className="mt-2 p-4 bg-white border border-gray-200 rounded-lg shadow-lg absolute z-10 max-w-md">
+                                      <div className="flex justify-between items-start mb-2">
+                                        <h4 className="font-medium text-gray-900">Full Proposal</h4>
+                                        <button 
+                                          onClick={() => setExpandedProposal(null)}
+                                          className="text-gray-400 hover:text-gray-600"
+                                        >
+                                          <X className="w-4 h-4" />
+                                        </button>
+                                      </div>
+                                      <p className="text-gray-700 whitespace-pre-wrap">{user.proposal}</p>
+                                    </div>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-gray-400">No proposal</span>
+                              )}
                             </td>
                           </tr>
                         ))}

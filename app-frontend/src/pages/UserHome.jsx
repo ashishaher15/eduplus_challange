@@ -28,6 +28,10 @@ function UserHome() {
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const [isUploading, setIsUploading] = useState(false)
+  // Add a state for proposals
+  const [storeProposals, setStoreProposals] = useState({})
+  // Add this state variable for proposal notifications
+  const [proposalNotification, setProposalNotification] = useState(null)
   
   useEffect(() => {
     // Redirect if not logged in or not a user
@@ -62,21 +66,96 @@ function UserHome() {
     fetchStores(searchName, searchAddress)
   }
 
-  const handleRatingChange = async (storeId, rating) => {
-    if (!user) return
-
-    try {
-      const updatedStore = await userApi.submitRating({
-        userId: user.id,
-        storeId,
-        rating: Number.parseInt(rating),
-      })
-
-      // Update the store in the list
-      setStores(stores.map((store) => (store.id === updatedStore.id ? updatedStore : store)))
-    } catch (error) {
+  const handleRatingChange = (storeId, rating) => {
+    // If rating is empty, don't submit
+    if (!rating) return
+    
+    setIsLoading(true)
+    
+    userApi.submitRating({
+      userId: user.id,
+      storeId,
+      rating,
+      proposal: storeProposals[storeId] || ""
+    })
+    .then(updatedStore => {
+      setStores(prevStores =>
+        prevStores.map(store =>
+          store.id === updatedStore.id ? updatedStore : store
+        )
+      )
+      setIsLoading(false)
+    })
+    .catch(error => {
       console.error("Error submitting rating:", error)
-    }
+      setIsLoading(false)
+    })
+  }
+
+  // Add a function to handle proposal changes
+  const handleProposalChange = (storeId, proposal) => {
+    setStoreProposals(prev => ({
+      ...prev,
+      [storeId]: proposal
+    }))
+  }
+
+  // Fix the handleProposalSubmit function by moving it inside the component
+  const handleProposalSubmit = (storeId) => {
+    // Don't submit if there's no proposal
+    if (!storeProposals[storeId] && !stores.find(store => store.id === storeId)?.userProposal) return
+    
+    setIsLoading(true)
+    
+    userApi.submitRating({
+      userId: user.id,
+      storeId,
+      rating: stores.find(store => store.id === storeId)?.userRating || 3, // Use existing rating or default to 3
+      proposal: storeProposals[storeId] || stores.find(store => store.id === storeId)?.userProposal
+    })
+    .then(updatedStore => {
+      setStores(prevStores =>
+        prevStores.map(store =>
+          store.id === updatedStore.id ? updatedStore : store
+        )
+      )
+      setIsLoading(false)
+      
+      // Show notification
+      setProposalNotification({
+        storeId,
+        message: updatedStore.userProposal ? "Proposal updated successfully!" : "Proposal submitted successfully!",
+        type: "success"
+      })
+      
+      // Clear notification after 3 seconds
+      setTimeout(() => {
+        setProposalNotification(null)
+      }, 3000)
+      
+      // Clear the proposal from the temporary state since it's now saved
+      setStoreProposals(prev => {
+        const newState = {...prev}
+        delete newState[storeId]
+        return newState
+      })
+    })
+    .catch(error => {
+      console.error("Error submitting proposal:", error)
+      setIsLoading(false)
+      
+      // Show error notification
+      setProposalNotification({
+        storeId,
+        message: "Failed to submit proposal. Please try again.",
+        type: "error"
+      })
+      
+      // Clear notification after 3 seconds
+      setTimeout(() => {
+        setProposalNotification(null)
+      }, 3000)
+    })
   }
 
   const handlePasswordChange = (e) => {
@@ -205,30 +284,30 @@ function UserHome() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> {/* Increased py-4 to py-8 */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-8"> {/* Increased space-x-4 to space-x-8 */}
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg"> {/* Increased w-10 h-10 to w-20 h-20 */}
-                <User className="w-12 h-12 text-white" /> {/* Increased w-6 h-6 to w-12 h-12 */}
+            <div className="flex items-center space-x-8">
+              <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-600 rounded-lg">
+                <User className="w-12 h-12 text-white" />
               </div>
               <div>
-                <h1 className="text-4xl font-bold text-gray-900">User Dashboard</h1> {/* Increased text-2xl to text-4xl */}
-                <p className="text-xl text-gray-600">Welcome back, {user.name}!</p> {/* Added text-xl */}
+                <h1 className="text-4xl font-bold text-gray-900">User Dashboard</h1>
+                <p className="text-xl text-gray-600">Welcome back, {user.name}!</p>
               </div>
             </div>
-            <div className="flex items-center space-x-6"> {/* Increased space-x-3 to space-x-6 */}
+            <div className="flex items-center space-x-6">
               <button
                 onClick={() => setShowPasswordForm(!showPasswordForm)}
                 className="inline-flex items-center px-8 py-4 border border-gray-300 rounded-lg text-lg font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors duration-200"
-              > {/* Increased px-4 py-2 to px-8 py-4 and text-sm to text-lg */}
-                <Settings className="w-8 h-8 mr-4" /> {/* Increased w-4 h-4 mr-2 to w-8 h-8 mr-4 */}
+              >
+                <Settings className="w-8 h-8 mr-4" />
                 Settings
               </button>
               <button
                 onClick={logout}
                 className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-lg text-lg font-medium hover:from-red-600 hover:to-red-700 transition-all duration-200 transform hover:scale-105"
-              > {/* Increased px-4 py-2 to px-8 py-4 and text-sm to text-lg */}
-                <LogOut className="w-8 h-8 mr-4" /> {/* Increased w-4 h-4 mr-2 to w-8 h-8 mr-4 */}
+              >
+                <LogOut className="w-8 h-8 mr-4" />
                 Logout
               </button>
             </div>
@@ -236,10 +315,10 @@ function UserHome() {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16"> {/* Increased py-8 to py-16 */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Welcome Card with Profile Image */}
-        <div className="bg-white rounded-xl shadow-lg p-12 mb-16 animate-fade-in"> {/* Increased p-6 mb-8 to p-12 mb-16 */}
-          <div className="flex items-center space-x-8"> {/* Increased space-x-4 to space-x-8 */}
+        <div className="bg-white rounded-xl shadow-lg p-12 mb-16 animate-fade-in">
+          <div className="flex items-center space-x-8">
             <div className="relative">
               {user.profile_image_url ? (
                 <img 
@@ -255,8 +334,8 @@ function UserHome() {
               <button 
                 onClick={() => fileInputRef.current.click()}
                 className="absolute -bottom-2 -right-2 bg-purple-600 text-white p-2 rounded-full hover:bg-purple-700 transition-colors"
-              > {/* Increased p-1 to p-2 and adjusted position */}
-                <Camera className="w-8 h-8" /> {/* Increased w-4 h-4 to w-8 h-8 */}
+              >
+                <Camera className="w-8 h-8" />
               </button>
               <input 
                 type="file" 
@@ -267,8 +346,8 @@ function UserHome() {
               />
             </div>
             <div>
-              <h2 className="text-3xl font-semibold text-gray-900">Welcome, {user.name}!</h2> {/* Increased text-xl to text-3xl */}
-              <p className="text-xl text-gray-600"> {/* Added text-xl */}
+              <h2 className="text-3xl font-semibold text-gray-900">Welcome, {user.name}!</h2>
+              <p className="text-xl text-gray-600">
                 You are logged in as a <span className="font-medium text-purple-600">{user.role}</span>
               </p>
             </div>
@@ -276,13 +355,13 @@ function UserHome() {
           
           {/* Image Preview and Upload Button */}
           {imagePreview && (
-            <div className="mt-8 flex flex-col items-center space-y-6"> {/* Increased mt-4 space-y-3 to mt-8 space-y-6 */}
-              <div className="relative w-64 h-64"> {/* Increased w-32 h-32 to w-64 h-64 */}
+            <div className="mt-8 flex flex-col items-center space-y-6">
+              <div className="relative w-64 h-64">
                 <img 
                   src={imagePreview} 
                   alt="Preview" 
                   className="w-64 h-64 rounded-lg object-cover"
-                /> {/* Increased w-32 h-32 to w-64 h-64 */}
+                />
                 <button 
                   onClick={() => {
                     setImagePreview(null);
@@ -290,8 +369,8 @@ function UserHome() {
                     if (fileInputRef.current) fileInputRef.current.value = "";
                   }}
                   className="absolute -top-4 -right-4 bg-red-500 text-white p-2 rounded-full hover:bg-red-600 transition-colors"
-                > {/* Increased -top-2 -right-2 p-1 to -top-4 -right-4 p-2 */}
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor"> {/* Increased h-4 w-4 to h-8 w-8 */}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
                   </svg>
                 </button>
@@ -300,15 +379,15 @@ function UserHome() {
                 onClick={handleImageUpload}
                 disabled={isUploading}
                 className={`px-8 py-4 rounded-lg text-white font-medium flex items-center text-lg ${isUploading ? 'bg-gray-400' : 'bg-purple-600 hover:bg-purple-700'} transition-colors`}
-              > {/* Increased px-4 py-2 to px-8 py-4 and added text-lg */}
+              >
                 {isUploading ? (
                   <>
-                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white mr-4"></div> {/* Increased h-4 w-4 mr-2 to h-8 w-8 mr-4 */}
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-white mr-4"></div>
                     Uploading...
                   </>
                 ) : (
                   <>
-                    <Upload className="w-8 h-8 mr-4" /> {/* Increased w-4 h-4 mr-2 to w-8 h-8 mr-4 */}
+                    <Upload className="w-8 h-8 mr-4" />
                     Upload Profile Image
                   </>
                 )}
@@ -317,7 +396,6 @@ function UserHome() {
           )}
         </div>
         
-        {/* Rest of the component remains the same with size increases */}
         {/* Password Update Form */}
         {showPasswordForm && (
           <div className="bg-white rounded-xl shadow-lg p-6 mb-8 animate-slide-down">
@@ -519,6 +597,29 @@ function UserHome() {
                         <option value="4">⭐⭐⭐⭐ 4 - Very Good</option>
                         <option value="5">⭐⭐⭐⭐⭐ 5 - Excellent</option>
                       </select>
+                      
+                      <label className="block text-sm font-medium text-gray-700 mb-2 mt-3">Your Proposal</label>
+                      <textarea
+                        value={storeProposals[store.id] || store.userProposal || ""}
+                        onChange={(e) => handleProposalChange(store.id, e.target.value)}
+                        placeholder="Enter your proposal here..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-300"
+                        rows="3"
+                      />
+                      <button
+                        onClick={() => handleProposalSubmit(store.id)}
+                        className="mt-3 w-full px-4 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg font-medium hover:from-green-600 hover:to-green-700 transition-all duration-200 transform hover:scale-105"
+                        disabled={!storeProposals[store.id] && !store.userProposal}
+                      >
+                        {store.userProposal ? "Update Proposal" : "Submit Proposal"}
+                      </button>
+
+                      {/* Add notification display */}
+                      {proposalNotification && proposalNotification.storeId === store.id && (
+                        <div className={`mt-3 px-4 py-2 rounded-lg text-white ${proposalNotification.type === 'success' ? 'bg-green-500' : 'bg-red-500'} animate-fade-in`}>
+                          {proposalNotification.message}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

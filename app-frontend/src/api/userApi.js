@@ -16,15 +16,17 @@ const userApi = {
     }
   },
   
-  submitRating: async ({ userId, storeId, rating }) => {
+  submitRating: async ({ userId, storeId, rating, proposal }) => {
     try {
-      const response = await axios.post(
-        `${API_BASE}/user/stores/${storeId}/rate`,
-        { userId, rating }
-      );
+      const response = await axios.post(`${API_BASE}/user/stores/${storeId}/rate`, {
+        userId,
+        rating,
+        proposal
+      });
       return response.data;
     } catch (error) {
-      throw error.response?.data || { error: 'Failed to submit application' };
+      console.error('Error submitting rating:', error);
+      throw error;
     }
   }
 };

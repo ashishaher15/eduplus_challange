@@ -1,6 +1,6 @@
 # 🏪 Store Rating System - Developer Guide
 
-> A comprehensive store rating platform with role-based access control, allowing users to browse and rate stores, store owners to manage listings, and administrators to oversee the entire system .
+> A comprehensive store rating platform with role-based access control, allowing users to browse and rate stores, store owners to manage listings, and administrators to oversee the entire system.
 
 ---
 

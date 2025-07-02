@@ -15,10 +15,8 @@ jobs:
         include:
           - app: frontend
             path: app-frontend
-            ecr_uri: ${{ secrets.ECR_FRONT_URI }}
           - app: backend
             path: app-backend
-            ecr_uri: ${{ secrets.ECR_BACK_URI }}
     
     steps:
       - name: Checkout code
@@ -38,7 +36,7 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          ECR_REPOSITORY: ${{ matrix.ecr_uri }}
+          ECR_REPOSITORY: ${{ matrix.app == 'frontend' && secrets.ECR_FRONT_URI || secrets.ECR_BACK_URI }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           cd ${{ matrix.path }}

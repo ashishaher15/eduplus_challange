@@ -3,7 +3,7 @@
 A complete system for managing tenders with role-based access. End-users can rate companies, contractors can manage their listings, and admins oversee everything through a secure backend.
 
 ---
-![image alt](https://github.com/sunilsonumonu12/Demo/blob/f5b8bddc758f50d8155b08a793652473baa6cb92/image.png)
+![image alt](https://github.com/sunilsonumonu12/Demo/blob/b8a4a5cb29fd2d2d8f689102f7a3a9387492bb44/image2.png)
 ## 🚀 Live Links
 
 - **Backend:** https://your-backend-url.com  
@@ -177,9 +177,5 @@ A rating and proposal submission platform tailored for contractors and tender ma
 - Supabase account
 
 ### Setup
+![image alt](https://github.com/sunilsonumonu12/Demo/blob/f5b8bddc758f50d8155b08a793652473baa6cb92/image.png)
 
-```bash
-git clone https://github.com/sunilsonumonu12/TenderPlatform.git
-cd TenderPlatform
-npm install
-npm run dev

@@ -44,7 +44,7 @@ testConnection().then(async (connected) => {
       console.error('❌ Database initialization error:', error);
     }
     
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   } else {

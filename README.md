@@ -3,7 +3,10 @@
 A complete system for managing tenders with role-based access. End-users can rate companies, contractors can manage their listings, and admins oversee everything through a secure backend.
 
 ---
-![image alt](https://github.com/sunilsonumonu12/Demo/blob/b8a4a5cb29fd2d2d8f689102f7a3a9387492bb44/image2.png)
+## Demo Screenshot
+
+<img src="https://github.com/sunilsonumonu12/Demo/blob/b8a4a5cb29fd2d2d8f689102f7a3a9387492bb44/image2.png?raw=true" alt="image alt" width="400"/>
+
 ## 🚀 Live Links
 
 - **Backend:** https://your-backend-url.com  

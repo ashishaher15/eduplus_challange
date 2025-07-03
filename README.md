@@ -1,157 +1,185 @@
-🏗️ Tender Management Platform – Developer Guide
+# 🏗️ Tender Management Platform – Developer Guide
+
 A complete system for managing tenders with role-based access. End-users can rate companies, contractors can manage their listings, and admins oversee everything through a secure backend.
 
-🚀 Live Links
-Backend: https://your-backend-url.com
+---
 
-Frontend: https://your-frontend-url.com
+## 🚀 Live Links
 
-GitHub: sunilsonumonu12/TenderPlatform
+- **Backend:** https://your-backend-url.com  
+- **Frontend:** https://your-frontend-url.com  
+- **GitHub:** [sunilsonumonu12/TenderPlatform](https://github.com/sunilsonumonu12/TenderPlatform)
 
-📚 Table of Contents
-Overview
+---
 
-Tech Stack
+## 📚 Table of Contents
 
-🔐 Authentication Flow
+- [Overview](#overview)  
+- [Tech Stack](#tech-stack)  
+- [🔐 Authentication Flow](#-authentication-flow)  
+- [👤 User Features](#-user-features)  
+- [🏢 Contractor Features](#-contractor-features)  
+- [🛠️ Admin Features](#️-admin-features)  
+- [🗄️ Database Structure](#️-database-structure)  
+- [🔗 API Endpoints](#-api-endpoints)  
+- [🔒 Security Highlights](#-security-highlights)  
+- [🖼️ Storage Integration](#️-storage-integration)  
+- [⚙️ Getting Started](#️-getting-started)
 
-👤 User Features
+---
 
-🏢 Contractor Features
+## 🔍 Overview
 
-🛠️ Admin Features
-
-🗄️ Database Structure
-
-🔗 API Endpoints
-
-🔒 Security Highlights
-
-🖼️ Storage Integration
-
-⚙️ Getting Started
-
-🔍 Overview
 A rating and proposal submission platform tailored for contractors and tender management. Features include authentication, store management, and rating analytics.
 
-🧱 Tech Stack
-Frontend
+---
 
-⚛️ React + Vite
+## 🧱 Tech Stack
 
-🎨 Tailwind CSS
+**Frontend**
 
-📱 Responsive UI
+- ⚛️ React + Vite  
+- 🎨 Tailwind CSS  
+- 📱 Responsive UI
 
-Backend
+**Backend**
 
-🟢 Node.js + Express
+- 🟢 Node.js + Express  
+- 🐘 PostgreSQL  
+- 🌐 REST API  
+- 🪣 Supabase (for file storage)
 
-🐘 PostgreSQL
+---
 
-🌐 REST API
+## 🔐 Authentication Flow
 
-🪣 Supabase (for file storage)
+- Role-based login: `user`, `contractor`, `admin`  
+- Protected API routes based on roles  
+- Profile image upload via Supabase  
+- JWT authentication (customizable)
 
-🔐 Authentication System
-Role-based login: user, contractor, admin
+---
 
-Protected API routes based on roles
+## 👤 User Features
 
-Profile image upload via Supabase
+- 🔍 Browse companies with filter/search  
+- ⭐ Rate companies (1–5 stars) with optional proposal  
+- 📝 View/edit profile & upload profile image  
+- 📊 Dashboard to track submissions
 
-JWT authentication (customizable)
+---
 
-👤 User Features
-🔍 Browse companies with filter/search
+## 🏢 Contractor Features
 
-⭐ Rate companies (1–5 stars) with optional proposal
+- 🏪 Create and manage their own companies  
+- 📈 See all ratings/proposals for their companies  
+- 👥 View users who rated them  
+- ✏️ Update store details anytime
 
-📝 View/edit profile & upload profile image
+---
 
-📊 Dashboard to track submissions
+## 🛠️ Admin Features
 
-🏢 Contractor Features
-🏪 Create and manage their own companies
+- 👥 View, create, and manage users  
+- 🏪 View and assign stores to contractors  
+- 📊 View system-wide stats: user/store/rating count  
+- 🔍 Moderate rating activity
 
-📈 See all ratings/proposals for their companies
+---
 
-👥 View users who rated them
+## 🗄️ Database Structure
 
-✏️ Update store details anytime
+### `users` table
 
-🛠️ Admin Features
-👥 View, create, and manage users
+- `id` (Primary Key)  
+- `name`  
+- `email` (unique)  
+- `address`  
+- `password`  
+- `role` (`admin`, `contractor`, `user`)  
+- `profile_image_url`  
+- `created_at` (timestamp)
 
-🏪 View and assign stores to contractors
+### `companies` table
 
-📊 View system-wide stats: user/store/rating count
+- `id` (Primary Key)  
+- `name`  
+- `email`  
+- `address`  
+- `owner_user_id` (Foreign Key → users.id)  
+- `created_at` (timestamp)
 
-🔍 Moderate rating activity
+### `applications` table
 
-🗄️ Database Structure
-users
-id, name, email, address, password, role, profile_image_url, created_at
+- `id` (Primary Key)  
+- `company_id` (Foreign Key → companies.id)  
+- `user_id` (Foreign Key → users.id)  
+- `rating` (1–5 decimal)  
+- `comment` (optional)  
+- `proposal` (optional)  
+- `created_at` (timestamp)
 
-companies
-id, name, email, address, owner_user_id (FK), created_at
+---
 
-applications/ratings
-id, company_id (FK), user_id (FK), rating, comment, proposal, created_at
+## 🔗 API Endpoints
 
-🔗 API Endpoints
-Auth
-POST /api/auth/register
+### Authentication
 
-POST /api/auth/login
+- `POST /api/auth/register` – Register a new user  
+- `POST /api/auth/login` – Login existing user  
+- `PUT /api/auth/password` – Update password  
+- `POST /api/auth/profile-image` – Upload profile image  
+- `GET /api/auth/profile/:userId` – Get user profile
 
-PUT /api/auth/password
+### User
 
-POST /api/auth/profile-image
+- `GET /api/user/stores` – Get all companies with user rating status  
+- `POST /api/user/stores/:storeId/rate` – Submit or update a rating
 
-GET /api/auth/profile/:userId
+### Admin
 
-User
-GET /api/user/stores
+- `GET /api/admin/users` – List all users  
+- `GET /api/admin/users/:id` – Get user details  
+- `POST /api/admin/users` – Create new user  
+- `GET /api/admin/stores` – List all stores  
+- `POST /api/admin/stores` – Create a store  
+- `GET /api/admin/stores/owner/:ownerId` – Get stores by contractor  
+- `GET /api/admin/stores/:storeId/ratings/users` – Users who rated a store
 
-POST /api/user/stores/:storeId/rate
+---
 
-Admin
-GET /api/admin/users
+## 🔒 Security Highlights
 
-GET /api/admin/users/:id
+- ✅ Input validation (server-side)  
+- 🔐 Role-based route protection  
+- 🚫 CORS and secure headers  
+- ⚠️ Plaintext password warning (consider hashing)  
+- 🧪 Optional: login event logging
 
-POST /api/admin/users
+---
 
-GET /api/admin/stores
+## 🖼️ Storage Integration (Supabase)
 
-POST /api/admin/stores
+- Upload base64 profile image  
+- Stored in `profile-images` bucket  
+- Filename format: `userId_timestamp`  
+- Public URL saved in database  
+- Easy frontend image rendering
 
-GET /api/admin/stores/owner/:ownerId
+---
 
-GET /api/admin/stores/:storeId/ratings/users
+## ⚙️ Getting Started
 
-🔒 Security Features
-✅ Input validation (server-side)
+### Prerequisites
 
-🔐 Role-based route protection
+- Node.js v14+  
+- PostgreSQL  
+- Supabase account
 
-🚫 CORS + Headers for secure API calls
+### Setup
 
-🧪 Plaintext password warning (hashing recommended)
-
-🧹 Event logging (optional)
-
-🖼️ Storage Integration (Supabase)
-Profile image upload from Base64
-
-Stored in profile-images bucket
-
-Filenames = userId_timestamp
-
-Public URL saved in DB for frontend use
-
-⚙️ Getting Started
-Prerequisites
-Node.js v14+
-
+```bash
+git clone https://github.com/sunilsonumonu12/TenderPlatform.git
+cd TenderPlatform
+npm install
+npm run dev

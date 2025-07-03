@@ -179,6 +179,7 @@ A rating and proposal submission platform tailored for contractors and tender ma
 - PostgreSQL  
 - Supabase account
 
-### Setup
-![image alt](https://github.com/sunilsonumonu12/Demo/blob/f5b8bddc758f50d8155b08a793652473baa6cb92/image.png)
+## Demo Screenshot
+
+<img src="https://github.com/sunilsonumonu12/Demo/blob/b8a4a5cb29fd2d2d8f689102f7a3a9387492bb44/image.png?raw=true" alt="image alt" width="400"/>
 

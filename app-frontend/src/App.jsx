@@ -17,14 +17,15 @@ import AdminCompanies from './pages/AdminCompanies';
 import AdminCompanyForm from './pages/AdminCompanyForm';
 import ContractorHome from './pages/ContractorHome';
 import CompanyForm from './pages/CompanyForm';
+import LandingPage from './pages/landingpage'; // Import the landing page component
 
 function App() {
   return (
     <AuthProvider>
       <Router>
         <Routes>
-          {/* Redirect root to login */}
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          {/* Set landing page as the default route */}
+          <Route path="/" element={<LandingPage />} />
           
           {/* Auth routes */}
           <Route path="/login" element={<LoginPage />} />
@@ -114,8 +115,8 @@ function App() {
             } 
           />
           
-          {/* Catch all route */}
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          {/* Catch all route - redirect to landing page instead of login */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>

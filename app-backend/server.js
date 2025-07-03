@@ -13,7 +13,7 @@ import { initDatabase } from './src/controllers/initController.js';
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://demo-1-rjfr.onrender.com'], // Vite's default port
+  origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : ['http://localhost:5173', 'https://demo-1-rjfr.onrender.com'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']

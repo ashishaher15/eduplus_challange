@@ -1,206 +1,157 @@
-# 🏪 Store Rating System - Developer Guide
+🏗️ Tender Management Platform – Developer Guide
+A complete system for managing tenders with role-based access. End-users can rate companies, contractors can manage their listings, and admins oversee everything through a secure backend.
 
-> A comprehensive store rating platform with role-based access control, allowing users to browse and rate stores, store owners to manage listings, and administrators to oversee the entire system.
+🚀 Live Links
+Backend: https://your-backend-url.com
 
----
+Frontend: https://your-frontend-url.com
 
-## 🚀 Live Demo & Repository
-- **Backend**: [https://demo-o729.onrender.com](https://demo-o729.onrender.com)  
-- **Frontend**: [https://demo-1-rjfr.onrender.com](https://demo-1-rjfr.onrender.com)  
-- **GitHub**: [sunilsonumonu12/Demo](https://github.com/sunilsonumonu12/Demo)  
+GitHub: sunilsonumonu12/TenderPlatform
 
----
+📚 Table of Contents
+Overview
 
-## 📖 Table of Contents
-1. [Overview](#overview)
-2. [Tech Stack](#tech-stack)
-3. [Key Features](#key-features)
-   - [🔐 Authentication System](#authentication-system)
-   - [👤 User Features](#user-features)
-   - [🏬 Store Owner Features](#store-owner-features)
-   - [🛠️ Admin Features](#admin-features)
-4. [🗄️ Database Structure](#database-structure)
-5. [🔗 API Endpoints](#api-endpoints)
-6. [🔒 Security Features](#security-features)
-7. [🎨 UI Components](#ui-components)
-8. [⚙️ Getting Started](#getting-started)
-9. [📈 Areas for Improvement](#areas-for-improvement)
-10. [🙏 Acknowledgements](#acknowledgements)
+Tech Stack
 
----
+🔐 Authentication Flow
 
-## Overview
-This Store Rating System is designed to let end-users browse and rate stores, store owners manage their listings, and administrators oversee the platform. It features role-based access control, a responsive frontend, and a RESTful backend.
+👤 User Features
 
----
+🏢 Contractor Features
 
-## Tech Stack
-- **Frontend**:  
-  - ⚛️ React + Vite  
-  - 🎨 Tailwind CSS  
-  - 📱 Responsive design (mobile, tablet, desktop)
-- **Backend**:  
-  - 🟢 Node.js + Express  
-  - 🐬 MySQL database  
-  - 🌐 RESTful API architecture
+🛠️ Admin Features
 
----
+🗄️ Database Structure
 
-## Key Features
+🔗 API Endpoints
 
-### 🔐 Authentication System
-- **User Registration & Login**  
-  - ✅ Comprehensive validation (client + server)  
-  - 🎭 Role-based login: `Admin`, `Store Owner`, `User`  
-  - 🔄 Persistent auth using `localStorage`  
-  - 🚧 Protected routes based on user roles  
-- **Password Management**  
-  - 🔄 Update current password via API
+🔒 Security Highlights
 
----
+🖼️ Storage Integration
 
-### 👤 User Features
-- 🔍 Browse all stores with search/filter by name & address  
-- ⭐ Submit or update ratings (1–5 stars) + optional comments  
-- 📝 View and edit own profile & update password  
-- 📊 Dashboard shows user info & past ratings  
-- 📱 Fully responsive experience
+⚙️ Getting Started
 
----
+🔍 Overview
+A rating and proposal submission platform tailored for contractors and tender management. Features include authentication, store management, and rating analytics.
 
-### 🏬 Store Owner Features
-- 🏷️ View & manage own store details  
-- 📈 See detailed rating stats for their store  
-- 👥 View list of users who rated their store  
-- ✏️ Update store info (name, address, etc.)  
-- 🔔 (Optionally) Notifications when new ratings arrive
+🧱 Tech Stack
+Frontend
 
----
+⚛️ React + Vite
 
-### 🛠️ Admin Features
-- 📊 Dashboard with system-wide statistics:  
-  - 👥 Total users count  
-  - 🏪 Total stores count  
-  - ⭐ Total ratings count
-- 👤 **User Management**:  
-  - 📋 List all users  
-  - ➕ Create new user accounts  
-  - 🔍 View user details
-- 🏬 **Store Management**:  
-  - 📋 List all stores  
-  - ➕ Create new store entries  
-  - 🔗 Assign stores to store owners  
-- 🔄 (Optionally) Bulk operations: deactivate/reactivate users or stores
+🎨 Tailwind CSS
 
----
+📱 Responsive UI
 
-## 🗄️ Database Structure
+Backend
 
-**Tables:**
+🟢 Node.js + Express
 
-1. **`users`**  
-   - `id` (PK)  
-   - `name`  
-   - `email` (unique)  
-   - `address`  
-   - `password`  
-   - `role` (`Admin` / `Store Owner` / `User`)  
-   - `created_at` (timestamp)
+🐘 PostgreSQL
 
-2. **`stores`**  
-   - `id` (PK)  
-   - `name`  
-   - `email` (contact for store)  
-   - `address`  
-   - `owner_user_id` (FK → `users.id`)  
-   - `created_at` (timestamp)
+🌐 REST API
 
-3. **`ratings`**  
-   - `id` (PK)  
-   - `store_id` (FK → `stores.id`)  
-   - `user_id` (FK → `users.id`)  
-   - `rating` (INT, 1–5)  
-   - `comment` (TEXT, optional)  
-   - `created_at` (timestamp)
+🪣 Supabase (for file storage)
 
----
+🔐 Authentication System
+Role-based login: user, contractor, admin
 
-## 🔗 API Endpoints
+Protected API routes based on roles
 
-### Authentication
-- **POST** `/api/auth/register`  
-  - Register a new user  
-  - Body: `{ name, email, address, password, role? }`
-- **POST** `/api/auth/login`  
-  - Login existing user  
-  - Body: `{ email, password }`
-- **PUT** `/api/auth/password`  
-  - Update password for logged-in user  
-  - Body: `{ oldPassword, newPassword }`
+Profile image upload via Supabase
 
-### Admin
-- **GET** `/api/admin/users`  
-  - Get list of all users
-- **GET** `/api/admin/users/:id`  
-  - Get single user details
-- **POST** `/api/admin/users`  
-  - Create a new user (Admin can set role)
-  - Body: `{ name, email, address, password, role }`
-- **GET** `/api/admin/stores`  
-  - Get list of all stores
-- **POST** `/api/admin/stores`  
-  - Create a new store  
-  - Body: `{ name, email, address, owner_user_id }`
-- **GET** `/api/admin/stores/owner/:ownerId`  
-  - Get store(s) by owner ID
-- **GET** `/api/admin/stores/:storeId/ratings/users`  
-  - Get list of users who rated a particular store
+JWT authentication (customizable)
 
-### User
-- **GET** `/api/user/stores`  
-  - Get all stores, including whether current user has rated them (and the rating)
-- **POST** `/api/user/stores/:storeId/rate`  
-  - Submit or update rating for a store  
-  - Body: `{ rating, comment? }`
+👤 User Features
+🔍 Browse companies with filter/search
 
-> 🔐 All protected routes require a valid JWT (or chosen token) in headers.  
-> 🚫 Access control: endpoints under `/api/admin/...` restricted to Admin role, `/api/user/...` accessible to Users and Owners as appropriate.
+⭐ Rate companies (1–5 stars) with optional proposal
 
----
+📝 View/edit profile & upload profile image
 
-## 🔒 Security Features
-- ✅ Client-side & server-side form validation  
-- 🔐 Passwords: **(Note: currently plaintext—see Areas for Improvement)**  
-- 🚧 Protected routes with role-based checks in middleware  
-- 🔄 Token-based authentication stored in `localStorage` (or HTTP-only cookies if upgraded)
-- 🛡️ Input sanitization to prevent SQL injection / XSS
-- 📝 Logging of auth events (login failures, password changes)
+📊 Dashboard to track submissions
 
----
+🏢 Contractor Features
+🏪 Create and manage their own companies
 
-## 🎨 UI Components
-- **Modern, responsive design** using Tailwind CSS  
-- **Gradient backgrounds** for headers/cards for visual appeal  
-- **Interactive elements**:  
-  - Hover effects on buttons/cards  
-  - Smooth animations (e.g., fade-in lists, loading spinners)  
-- **Forms** with inline validation feedback (e.g., red border + icon on error)  
-- **Loading states & error handling**:  
-  - Spinners or skeleton loaders when fetching data  
-  - User-friendly error messages (e.g., “Unable to load stores. Please try again.”)  
-- **Mobile-first layouts**: collapsible navbars, bottom tabs if needed  
-- **Dashboard cards** summarizing stats (using simple charts or badges)
+📈 See all ratings/proposals for their companies
 
----
+👥 View users who rated them
 
-## ⚙️ Getting Started
+✏️ Update store details anytime
 
-### Prerequisites
-- 🔧 Node.js (v14+ recommended) and npm/yarn  
-- 🐬 MySQL database (or compatible, e.g., MariaDB)
+🛠️ Admin Features
+👥 View, create, and manage users
 
-### Setup Steps
-1. **Clone the repository**  
-   ```bash
-   git clone https://github.com/sunilsonumonu12/Demo.git
-   cd Demo
+🏪 View and assign stores to contractors
+
+📊 View system-wide stats: user/store/rating count
+
+🔍 Moderate rating activity
+
+🗄️ Database Structure
+users
+id, name, email, address, password, role, profile_image_url, created_at
+
+companies
+id, name, email, address, owner_user_id (FK), created_at
+
+applications/ratings
+id, company_id (FK), user_id (FK), rating, comment, proposal, created_at
+
+🔗 API Endpoints
+Auth
+POST /api/auth/register
+
+POST /api/auth/login
+
+PUT /api/auth/password
+
+POST /api/auth/profile-image
+
+GET /api/auth/profile/:userId
+
+User
+GET /api/user/stores
+
+POST /api/user/stores/:storeId/rate
+
+Admin
+GET /api/admin/users
+
+GET /api/admin/users/:id
+
+POST /api/admin/users
+
+GET /api/admin/stores
+
+POST /api/admin/stores
+
+GET /api/admin/stores/owner/:ownerId
+
+GET /api/admin/stores/:storeId/ratings/users
+
+🔒 Security Features
+✅ Input validation (server-side)
+
+🔐 Role-based route protection
+
+🚫 CORS + Headers for secure API calls
+
+🧪 Plaintext password warning (hashing recommended)
+
+🧹 Event logging (optional)
+
+🖼️ Storage Integration (Supabase)
+Profile image upload from Base64
+
+Stored in profile-images bucket
+
+Filenames = userId_timestamp
+
+Public URL saved in DB for frontend use
+
+⚙️ Getting Started
+Prerequisites
+Node.js v14+
+
